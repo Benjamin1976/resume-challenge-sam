@@ -1,7 +1,6 @@
 version = 0.1
 [default.deploy.parameters]
 stack_name = "resume-challenge-007"
-resolve_s3 = true
 s3_prefix = "resume-challenge-007"
 region = "us-east-1"
 confirm_changeset = false
