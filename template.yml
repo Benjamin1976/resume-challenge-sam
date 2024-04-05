@@ -8,16 +8,16 @@ Description: >
 Parameters:
   DynamoDBName:
     Type: "String"
-    Default: "ResumeVisits010"
+    Default: "ResumeVisits007"
   ResumeLambdaDynamoRoleName:
     Type: "String"
-    Default: "ResumeLambdaDynamoRole010"
+    Default: "ResumeLambdaDynamoRole007"
   FunctionName:
     Type: "String"
-    Default: "GetCounter010"
+    Default: "GetCounter007"
   ApiName:
     Type: "String"
-    Default: "GetCounterApi010"
+    Default: "GetCounterApi007"
   AllowedOrigin:
     Type: "String"
     Default: "*"
