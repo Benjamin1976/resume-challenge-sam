@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  resume setup lambda function
+
+  Resume Challenge Stack
+
+Parameters:
+  AllowedOrigin:
+    Type: "String"
+  DynamoTableName:
+    Type: "String"
+  FunctionName:
+    Type: "String"
+  ApiName:
+    Type: "String"
+
+Globals:
+  Function:
+    Timeout: 10
+    Tracing: Active
+    # AutoPublishAlias: live
+    Runtime: python3.9
+    MemorySize: 256
+    Architectures:
+      - x86_64
+    EphemeralStorage:
+      Size: 512
+    Environment:
+      Variables:
+        LOG_LEVEL: "DEBUG"
+        ALLOWED_ORIGIN: !Ref AllowedOrigin
+        POWERTOOLS_SERVICE_NAME: resume-challenge
+        POWERTOOLS_METRICS_NAMESPACE: ecommerce-app
+  Api:
+    EndpointConfiguration: REGIONAL
+    TracingEnabled: true
+    OpenApiVersion: "2.0"
+    Cors:
+      AllowMethods: "'OPTIONS,POST,GET'"
+      AllowHeaders: "'Content-Type'"
+      AllowOrigin: !Sub "'${AllowedOrigin}'"
+
+Resources:
+  GetCounterFunction:
+    FunctionName: !Ref FunctionName
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: counter/
+      Handler: read_counter.lambda_handler
+      ReservedConcurrentExecutions: 25
+      Environment:
+        Variables:
+          table_name: !Ref DynamoTableName
+      Policies:
+        - Statement:
+            - Sid: Statement1
+              Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DescribeTable
+                - dynamodb:*
+              Resource:
+                - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DynamoTableName}"
+      Tags:
+        application: resume challenge
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: Auto
+      SnapStart:
+        ApplyOn: None
+      Events:
+        HttpEvent1:
+          Type: Api
+          Properties:
+            Path: /v1/count
+            Method: GET
+            RestApiId: !Ref CounterApiGw
+
+  CounterApiGw:
+    Name: !Ref ApiName
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Dev
+      Tags:
+        application: resume challenge
+      # DefinitionBody:
+
+Outputs:
+  LambdaARN:
+    Description: The ARN of the underlying Lambda function.
+    Value: !GetAtt GetCounterFunction.Arn

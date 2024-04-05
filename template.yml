@@ -1,26 +1,49 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   auth-resources
 
   SAM Template for auth resources
 
+Parameters:
+  DynamoDBName:
+    Type: "String"
+    Default: "ResumeVisits010"
+  ResumeLambdaDynamoRoleName:
+    Type: "String"
+    Default: "ResumeLambdaDynamoRole010"
+  FunctionName:
+    Type: "String"
+    Default: "GetCounter010"
+  ApiName:
+    Type: "String"
+    Default: "GetCounterApi010"
+  AllowedOrigin:
+    Type: "String"
+    Default: "*"
+
 Resources:
-    Auth:
-      Type: AWS::Serverless::Application
-      Properties:
-        Location: auth.yaml
-    Product:
-      Type: AWS::Serverless::Application
-      Properties:
-        Location: product-mock.yaml
-        Parameters:
-          AllowedOrigin: 'http://localhost:8080'
-      DependsOn: Auth
-    Shopping:
-      Type: AWS::Serverless::Application
-      Properties:
-        Location: shoppingcart-service.yaml
-        Parameters:
-          AllowedOrigin: 'http://localhost:8080'
-      DependsOn: Product
+  DynamoDB:
+    Type: AWS::Serverless::Application
+    Properties:
+      Parameters:
+        DynamoDBName: !Ref DynamoDBName
+      Location: dynamodb.yaml
+  Auth:
+    Type: AWS::Serverless::Application
+    Properties:
+      Parameters:
+        DynamoTableName: !GetAtt DynamoDB.Outputs.DynamoTableName
+        ResumeLambdaDynamoRoleName: !Ref ResumeLambdaDynamoRoleName
+      Location: auth.yaml
+    DependsOn: DynamoDB
+  Counter:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: counter.yaml
+      Parameters:
+        AllowedOrigin: !Ref AllowedOrigin
+        DynamoTableName: !GetAtt DynamoDB.Outputs.DynamoTableName
+        FunctionName: !Ref FunctionName
+        ApiName: !Ref ApiName
+    DependsOn: [Auth, DynamoDB]
