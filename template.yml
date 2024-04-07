@@ -37,13 +37,13 @@ Resources:
         ResumeLambdaDynamoRoleName: !Ref ResumeLambdaDynamoRoleName
       Location: auth.yaml
     DependsOn: DynamoDB
-  Counter:
-    Type: AWS::Serverless::Application
-    Properties:
-      Location: counter.yaml
-      Parameters:
-        AllowedOrigin: !Ref AllowedOrigin
-        DynamoTableName: !GetAtt DynamoDB.Outputs.DynamoTableName
-        FunctionName: !Ref FunctionName
-        ApiName: !Ref ApiName
-    DependsOn: [Auth, DynamoDB]
+  # Counter:
+  #   Type: AWS::Serverless::Application
+  #   Properties:
+  #     Location: counter.yaml
+  #     Parameters:
+  #       AllowedOrigin: !Ref AllowedOrigin
+  #       DynamoTableName: !GetAtt DynamoDB.Outputs.DynamoTableName
+  #       FunctionName: !Ref FunctionName
+  #       ApiName: !Ref ApiName
+  #   DependsOn: [Auth, DynamoDB]
