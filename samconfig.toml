@@ -1,7 +1,7 @@
 version = 0.1
 [default.deploy.parameters]
-stack_name = "resume-challenge-007"
-s3_prefix = "resume-challenge-007"
+stack_name = "benjamins-resume-challenge"
+s3_prefix = "benjamins-resume-challenge"
 region = "us-east-1"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM"
