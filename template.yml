@@ -3,7 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   auth-resources
 
-  SAM Template for auth resources
+  SAM Template for auth resourcess
 
 Parameters:
   DynamoDBName:
