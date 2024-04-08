@@ -72,7 +72,7 @@ Resources:
         ApplyOn: None
       Events:
         HttpEvent1:
-          Type: Api
+          Type: AWS::ApiGateway::RestApi
           Properties:
             Path: /v1/count
             Method: GET
