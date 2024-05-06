@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Resume Challenge Stack
+
+  Modify S3 bucket to make public
+
+Parameters:
+  s3BucketName:
+    Type: "String"
+
+Resources:
+  # S3 Website
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref s3BucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: False
+        BlockPublicPolicy: False
+        IgnorePublicAcls: False
+        RestrictPublicBuckets: False
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      AccessControl: PublicRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+Outputs:
+  S3BucketArn:
+    Value: !GetAtt S3Bucket.Arn
+    Description: Arn for the new bucket
+  WebsiteURL:
+    Value: !Sub "${s3BucketName}.s3-website-us-east-1.amazonaws.com"
+    Description: URL for website hosted on S3
+  S3BucketSecureURL:
+    Value: !Sub "https://${S3Bucket.DomainName}"
+    Description: Name of S3 bucket to hold website content

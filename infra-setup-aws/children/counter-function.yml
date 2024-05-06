@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Resume Challenge Stack
+
+  Resume setup Lambda function & API Gateway
+
+Parameters:
+  # AllowedOrigin:
+  #   Type: "String"
+  #   Default: "*"
+  DynamoTableName:
+    Type: "String"
+  FunctionName:
+    Type: "String"
+  ApiName:
+    Type: "String"
+  ResumeVisitsApi:
+    Type: "String"
+
+Resources:
+  ResumeVisitsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref FunctionName
+      Runtime: python3.9
+      CodeUri: ../../counter-aws/
+      Handler: read_counter.lambda_handler
+      # ReservedConcurrentExecutions: 25
+      Environment:
+        Variables:
+          table_name: !Ref DynamoTableName
+      Policies:
+        - Statement:
+            - Sid: Statement1
+              Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DescribeTable
+                - dynamodb:*
+              Resource:
+                - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DynamoTableName}"
+      Tags:
+        application: resume challenge
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: Auto
+      SnapStart:
+        ApplyOn: None
+      Events:
+        HttpEvent1:
+          Type: Api
+          Properties:
+            Path: /
+            Method: GET
+            RestApiId: !Ref ResumeVisitsApi
+
+Outputs:
+  ResumeVisitsFunctionArn:
+    Description: API Gateway endpoint URL for Prod stage for Resume Visits function
+    Value: !GetAtt ResumeVisitsFunction.Arn

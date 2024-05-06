@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  resume challenge resources
+
+  SAM Template for resume challenge resourcess
+
+Parameters:
+  Ver:
+    Type: "String"
+    Default: "001"
+  DynamoDBName:
+    Type: "String"
+    Default: bensresumechallenge
+  ResumeLambdaDynamoRoleName:
+    Type: "String"
+    Default: ResumeChallengeLambdaDynamoRole
+
+  s3BucketName:
+    Type: "String"
+    Default: bens-resume-challenge
+  GetFunctionName:
+    Type: "String"
+    Default: bens-resume-challenge-lambda-get
+  PutFunctionName:
+    Type: "String"
+    Default: bens-resume-challenge-lambda-put
+  ApiName:
+    Type: "String"
+    Default: bens-resume-challenge-api
+
+  HostedZoneId:
+    Type: "String"
+    Default: Z02979041LRIL8T1P1W8K
+
+  MyDomainName:
+    Type: "String"
+    Default: imaginators.cloud
+  DomainAcm:
+    Type: "String"
+    Default: arn:aws:acm:us-east-1:656129116436:certificate/f0e75e2e-1e0d-44bd-8319-0d0d263c2e16
+
+Resources:
+  # DynamoDB: Outputs(DynamoTableName)
+  DynamoDB:
+    Type: AWS::Serverless::Application
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Parameters:
+        DynamoDBName: !Sub "${DynamoDBName}-${Ver}"
+      Location: .\children\dynamodb.yml
+
+  # Auth:
+  Auth:
+    Type: AWS::Serverless::Application
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Parameters:
+        DynamoTableName: !GetAtt DynamoDB.Outputs.DynamoTableName
+        ResumeLambdaDynamoRoleName: !Sub "${ResumeLambdaDynamoRoleName}-${Ver}"
+      Location: .\children\auth.yml
+
+  # S3 Website: Outputs(S3BucketArn, WebsiteURL, S3BucketSecureURL)
+  S3Bucket:
+    Type: AWS::Serverless::Application
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Location: .\children\s3-create.yml
+      Parameters:
+        s3BucketName: !Sub "${s3BucketName}-${Ver}"
+
+  # # Cloudfront Dist: Outputs(CloudFrontURL, CloudFrontId, RecordSetName)
+  CloudFrontDist:
+    Type: AWS::Serverless::Application
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Location: .\children\cloudfront.yml
+      Parameters:
+        s3WebsiteURL: !GetAtt S3Bucket.Outputs.WebsiteURL
+        MyDomainName: !Sub "${Ver}.${MyDomainName}"
+        DomainCertificateAcm: !Ref DomainAcm
+
+  # Route53 CName Entry: Outputs(CloudFrontURL, CloudFrontId, RecordSetName)
+  CNameEntry:
+    Type: AWS::Serverless::Application
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Location: .\children\route53.yml
+      Parameters:
+        HostedZoneId: !Ref HostedZoneId
+        MyDomainName: !Sub "${Ver}.${MyDomainName}"
+        CloudFrontURL: !GetAtt CloudFrontDist.Outputs.CloudFrontURL
+
+  # Lambda Function & API Gateway
+  Counter:
+    Type: AWS::Serverless::Application
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Location: .\children\counter.yml
+      Parameters:
+        DynamoTableName: !GetAtt DynamoDB.Outputs.DynamoTableName
+        GetFunctionName: !Sub "${GetFunctionName}-${Ver}"
+        PutFunctionName: !Sub "${PutFunctionName}-${Ver}"
+        ApiName: !Sub "${ApiName}${Ver}"
+        ApiDomainName: !Sub "api-${Ver}.${MyDomainName}"
+        HostedZoneId: !Ref HostedZoneId
+        DomainAcm: !Ref DomainAcm
+        AllowedOrigin: "'*'"
+    DependsOn: [Auth]

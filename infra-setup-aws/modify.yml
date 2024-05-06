@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  auth-resources
+
+  SAM Template for auth resourcess
+
+Parameters:
+  s3BucketName:
+    Type: "String"
+    Default: "benjamins-challenge-test002"
+
+Resources:
+  # S3 Website
+  S3Bucket:
+  Type: AWS::Serverless::Application
+  Properties:
+    Location: .\children\s3-modify.yml
+    Parameters:
+      s3BucketName: !Ref s3BucketName
+      DynamoTableName: !GetAtt DynamoDB.Outputs.DynamoTableName
+      FunctionName: !Ref FunctionName
+      ApiName: !Ref ApiName
+  # outputs: S3BucketArn, WebsiteURL, S3BucketSecureURL

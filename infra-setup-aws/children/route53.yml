@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Resume Challenge Stack
+  Route53 cname entry
+
+Parameters:
+  HostedZoneId:
+    Type: "String"
+  MyDomainName:
+    Type: "String"
+  CloudFrontURL:
+    Type: "String"
+
+Resources:
+  CNameEntry:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: Test
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref MyDomainName
+      AliasTarget:
+        HostedZoneId: Z2FDTNDATAQYW2
+        DNSName: !Ref CloudFrontURL
+      Type: A

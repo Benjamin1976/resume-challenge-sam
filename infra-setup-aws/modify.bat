@@ -1,0 +1,1 @@
+sam build -t modify.yml && sam deploy -t modify.yml

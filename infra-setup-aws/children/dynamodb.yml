@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Resume Challenge Stack
+
+  Deploy Dynamo DB
+
+Parameters:
+  DynamoDBName:
+    Type: "String"
+
+Resources:
+  ResumeChlgDynamoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      TableClass: STANDARD
+      TableName: !Ref DynamoDBName
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: N
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+Outputs:
+  DynamoTableName:
+    Description: Name of the DynamoDB table we made.
+    Value: !Ref ResumeChlgDynamoTable

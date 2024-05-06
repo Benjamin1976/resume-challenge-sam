@@ -1,0 +1,12 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "resume-challenge-infra"
+s3_prefix = "resume-challenge-infra"
+resolve_s3 = true
+role_arn = "arn:aws:iam::656129116436:role/awsCloudFormationCLIRole"
+region = "us-east-1"
+confirm_changeset = false
+fail_on_empty_changeset = false
+capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM"
+disable_rollback = true
+image_repositories = []

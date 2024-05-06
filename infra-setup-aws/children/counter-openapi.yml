@@ -1,0 +1,98 @@
+openapi: 3.0.0
+info:
+  title: resume-visits-api
+  description: API for resume visits
+  version: 2019-10-13
+
+paths:
+  /:
+    get:
+      # operationId: !Ref ApiName
+      operationId: ResumeVisits
+      x-amazon-apigateway-integration:
+        # $ref: '#/components/x-amazon-apigateway-integrations/resumeVisits'
+        type: aws_proxy
+        httpMethod: get
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeVisitsFunction.Arn}/invocations"
+        passthroughBehavior: when_no_templates
+        payloadFormatVersion: 2.0
+      responses:
+        "200":
+          description: "Thanks for visiting Ben's resume"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          description: "Bad Request Exception"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestException"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorException"
+    post:
+      operationId: ResumeVisits
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: get
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeVisitsFunction.Arn}/invocations"
+        passthroughBehavior: when_no_templates
+        payloadFormatVersion: 2.0
+      responses:
+        "200":
+          description: "Thanks for visiting Ben's resume"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          description: "Bad Request Exception"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestException"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorException"
+components:
+  # x-amazon-apigateway-integrations:
+  #   resumeVisits:
+  #     type: aws_proxy
+  #     httpMethod: get
+  #     uri:
+  #       # Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:656129116436:function:resume-blp/invocations"
+  #       Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeVisitsFunction}/invocations"
+  #     passthroughBehavior: when_no_templates
+  #     payloadFormatVersion: 2.0
+  schemas:
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+        visits:
+          type: string
+    BadRequestException:
+      type: object
+      properties:
+        message:
+          type: string
+        errorCode:
+          type: string
+    InternalServerErrorException:
+      type: object
+      properties:
+        message:
+          type: string
+        errorCode:
+          type: string

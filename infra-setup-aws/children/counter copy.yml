@@ -1,0 +1,266 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Resume Challenge Stack
+
+  Resume setup Lambda function & API Gateway
+
+Parameters:
+  AllowedOrigin:
+    Type: "String"
+    Default: "*"
+  DynamoTableName:
+    Type: "String"
+  GetFunctionName:
+    Type: "String"
+  PutFunctionName:
+    Type: "String"
+  ApiName:
+    Type: "String"
+
+Globals:
+  Function:
+    Runtime: python3.9
+    Timeout: 180
+    Environment:
+      Variables:
+        table_name: !Ref DynamoTableName
+    Tags:
+      application: resume challenge
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'content-type'"
+      AllowOrigin: "'*'"
+
+Resources:
+  ResumeVisitsGetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref GetFunctionName
+      CodeUri: ../../counter-aws/read-counter/
+      Handler: read_counter.lambda_handler
+      Events:
+        HttpEvent1:
+          Type: Api
+          Properties:
+            Path: /
+            Method: GET
+            RestApiId: !Ref ResumeVisitsApi
+      Policies:
+        - Statement:
+            - Sid: Statement1
+              Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DescribeTable
+                - dynamodb:*
+              Resource:
+                - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DynamoTableName}"
+
+  ResumeVisitsPutFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref PutFunctionName
+      CodeUri: ../../counter-aws/update-counter/
+      Handler: update_counter.lambda_handler
+      Events:
+        HttpEvent1:
+          Type: Api
+          Properties:
+            Path: /
+            Method: POST
+            RestApiId: !Ref ResumeVisitsApi
+      Policies:
+        - Statement:
+            - Sid: Statement1
+              Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DescribeTable
+                - dynamodb:*
+              Resource:
+                - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DynamoTableName}"
+
+  ResumeVisitsApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Ref ApiName
+      StageName: dev
+      Cors:
+        AllowOrigin: !Ref AllowedOrigin
+        AllowMethods: "'POST, GET, OPTIONS'"
+      DefinitionBody:
+        openapi: 3.0.0
+        info:
+          title: resume-visits-api
+          description: API for resume visits
+          version: 2019-10-13
+
+        paths:
+          /:
+            get:
+              operationId: GetResumeVisits
+              responses:
+                "200":
+                  description: "Thanks for visiting Ben's resume"
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/Message"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
+                "400":
+                  description: "Bad Request Exception"
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/BadRequestException"
+                "500":
+                  description: "Internal Server Error"
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/InternalServerErrorException"
+              x-amazon-apigateway-integration:
+                # $ref: '#/components/x-amazon-apigateway-integrations/resumeVisits'
+                type: aws
+                httpMethod: POST
+                uri:
+                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeVisitsGetFunction.Arn}/invocations"
+                passthroughBehavior: when_no_templates
+                payloadFormatVersion: 2.0
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                    responseTemplates:
+                      application/json: {}
+                  # "":
+                  #   statusCode: "200"
+                  #   responseTemplates:
+                  #     application/json: {}
+                  #   # responseParameters:
+                  #   #   method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+                  #   #   method.response.header.Access-Control-Allow-Origin: "'*'"
+            post:
+              operationId: PutResumeVisits
+              responses:
+                "200":
+                  description: "Thanks for visiting Ben's resume"
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/Message"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
+                "400":
+                  description: "Bad Request Exception"
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/BadRequestException"
+                "500":
+                  description: "Internal Server Error"
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/InternalServerErrorException"
+              x-amazon-apigateway-integration:
+                type: aws
+                httpMethod: POST
+                uri:
+                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeVisitsPutFunction.Arn}/invocations"
+                passthroughBehavior: when_no_templates
+                payloadFormatVersion: 2.0
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                    responseTemplates:
+                      application/json: {}
+                  # default:
+                  #   statusCode: 200
+                  #   responseParameters:
+                  #     method.response.header.Access-Control-Allow-Headers: "'*'"
+                  #     method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+                  #     method.response.header.Access-Control-Allow-Origin: "'*'"
+                  #   responseTemplates:
+                  #     application/json: {}
+                  # "":
+                  #   statusCode: "200"
+                  #   responseTemplates:
+                  #     application/json: {}
+                  #   # responseParameters:
+                  #   #   # method.response.header.Access-Control-Allow-Headers: "'*'"
+                  #   #   method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+                  #   #   method.response.header.Access-Control-Allow-Origin: "'*'"
+        components:
+          # x-amazon-apigateway-integrations:
+          #   resumeVisits:
+          #     type: aws_proxy
+          #     httpMethod: get
+          #     uri:
+          #       # Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:656129116436:function:resume-blp/invocations"
+          #       Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeVisitsFunction}/invocations"
+          #     passthroughBehavior: when_no_templates
+          #     payloadFormatVersion: 2.0
+          schemas:
+            Message:
+              type: object
+              properties:
+                id:
+                  type: string
+                visits:
+                  type: string
+            BadRequestException:
+              type: object
+              properties:
+                message:
+                  type: string
+                errorCode:
+                  type: string
+            InternalServerErrorException:
+              type: object
+              properties:
+                message:
+                  type: string
+                errorCode:
+                  type: string
+
+      Tags:
+        application: resume challenge
+
+Outputs:
+  ResumeVisitsGetFunctionArn:
+    Description: API Gateway endpoint URL for Prod stage for Resume Visits Get function
+    Value: !GetAtt ResumeVisitsGetFunction.Arn
+  ResumeVisitsPutFunctionArn:
+    Description: API Gateway endpoint URL for Prod stage for Resume Visits Put function
+    Value: !GetAtt ResumeVisitsPutFunction.Arn

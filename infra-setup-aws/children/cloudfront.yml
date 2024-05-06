@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Resume Challenge Stack
+
+  Cloudfront distriubtion
+
+Parameters:
+  s3WebsiteURL:
+    Type: "String"
+  MyDomainName:
+    Type: "String"
+  DomainCertificateAcm:
+    Type: "String"
+
+Resources:
+  CloudFront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - DomainName: !Ref s3WebsiteURL
+            Id: !Ref s3WebsiteURL
+            CustomOriginConfig:
+              OriginProtocolPolicy: http-only
+              # OriginProtocolPolicy: https-only
+        Aliases:
+          - !Ref MyDomainName
+        ViewerCertificate:
+          AcmCertificateArn: !Ref DomainCertificateAcm
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+        PriceClass: PriceClass_200
+        DefaultRootObject: index.html
+        Enabled: "true"
+        DefaultCacheBehavior:
+          TargetOriginId: !Ref s3WebsiteURL
+          AllowedMethods:
+            - HEAD
+            - DELETE
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - PATCH
+          Compress: true
+          ViewerProtocolPolicy: redirect-to-https
+          ForwardedValues:
+            QueryString: false
+
+Outputs:
+  CloudFrontURL:
+    Value: !GetAtt
+      - CloudFront
+      - DomainName
+    Description: CloudFront Domain name URL
+  CloudFrontId:
+    Value: !GetAtt
+      - CloudFront
+      - Id
+    Description: CloudFrontID
