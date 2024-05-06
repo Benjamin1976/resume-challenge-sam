@@ -52,7 +52,7 @@ Resources:
     Properties:
       Parameters:
         DynamoDBName: !Sub "${DynamoDBName}-${Ver}"
-      Location: children\dynamodb.yml
+      Location: children/dynamodb.yml
 
   # Auth:
   Auth:
@@ -63,7 +63,7 @@ Resources:
       Parameters:
         DynamoTableName: !GetAtt DynamoDB.Outputs.DynamoTableName
         ResumeLambdaDynamoRoleName: !Sub "${ResumeLambdaDynamoRoleName}-${Ver}"
-      Location: children\auth.yml
+      Location: children/auth.yml
 
   # S3 Website: Outputs(S3BucketArn, WebsiteURL, S3BucketSecureURL)
   S3Bucket:
@@ -71,7 +71,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      Location: children\s3-create.yml
+      Location: children/s3-create.yml
       Parameters:
         s3BucketName: !Sub "${s3BucketName}-${Ver}"
 
@@ -81,7 +81,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      Location: children\cloudfront.yml
+      Location: children/cloudfront.yml
       Parameters:
         s3WebsiteURL: !GetAtt S3Bucket.Outputs.WebsiteURL
         MyDomainName: !Sub "${Ver}.${MyDomainName}"
@@ -93,7 +93,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      Location: children\route53.yml
+      Location: children/route53.yml
       Parameters:
         HostedZoneId: !Ref HostedZoneId
         MyDomainName: !Sub "${DomainNamePrefix}-${Ver}.${MyDomainName}"
@@ -105,7 +105,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      Location: children\counter.yml
+      Location: children/counter.yml
       Parameters:
         DynamoTableName: !GetAtt DynamoDB.Outputs.DynamoTableName
         GetFunctionName: !Sub "${GetFunctionName}-${Ver}"
