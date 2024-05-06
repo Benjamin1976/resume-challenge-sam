@@ -1,9 +1,0 @@
-version = 0.1
-[default.deploy.parameters]
-stack_name = "benjamins-resume-challenge"
-s3_prefix = "benjamins-resume-challenge"
-region = "us-east-1"
-confirm_changeset = false
-capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM"
-disable_rollback = true
-image_repositories = []
