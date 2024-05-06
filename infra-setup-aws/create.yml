@@ -33,6 +33,9 @@ Parameters:
     Type: "String"
     Default: Z02979041LRIL8T1P1W8K
 
+  DomainNamePrefix:
+    Type: "String"
+    Default: bens-resume
   MyDomainName:
     Type: "String"
     Default: imaginators.cloud
@@ -93,7 +96,7 @@ Resources:
       Location: .\children\route53.yml
       Parameters:
         HostedZoneId: !Ref HostedZoneId
-        MyDomainName: !Sub "${Ver}.${MyDomainName}"
+        MyDomainName: !Sub "${DomainNamePrefix}-${Ver}.${MyDomainName}"
         CloudFrontURL: !GetAtt CloudFrontDist.Outputs.CloudFrontURL
 
   # Lambda Function & API Gateway
